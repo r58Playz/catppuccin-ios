@@ -8,22 +8,90 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>prefs First Page</string>
+			<string>Settings</string>
 		</dict>
-		<dict>
+        <dict>
 			<key>cell</key>
-			<string>PSSwitchCell</string>
+			<string>PSLinkListCell</string>
+            <key>detail</key>
+            <string>PSListItemsController</string>
+            <key>label</key>
+            <string>Flavor</string>
 			<key>default</key>
-			<true/>
+			<string>mocha</string>
 			<key>defaults</key>
-			<string>com.catppuccin.ios.prefs</string>
+			<string>com.catppuccin.ios.preferences</string>
 			<key>key</key>
-			<string>AwesomeSwitch1</string>
-			<key>label</key>
-			<string>Awesome Switch 1</string>
+			<string>flavor</string>
+			<key>validValues</key>
+			<array>
+				<string>latte</string>
+				<string>frappe</string>
+				<string>macchiato</string>
+				<string>mocha</string>
+			</array>
+			<key>validTitles</key>
+			<array>
+				<string>Latte</string>
+				<string>Frappé</string>
+				<string>Macchiato</string>
+				<string>Mocha</string>
+			</array>
+			<key>PostNotification</key>
+			<string>com.catppuccin.ios.prefs/reload</string>
+		</dict>
+        <dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+            <key>detail</key>
+            <string>PSListItemsController</string>
+            <key>label</key>
+            <string>Accent</string>
+			<key>default</key>
+			<string>mauve</string>
+			<key>defaults</key>
+			<string>com.catppuccin.ios.preferences</string>
+			<key>key</key>
+			<string>accent</string>
+			<key>validValues</key>
+			<array>
+				<string>rosewater</string>
+				<string>flamingo</string>
+				<string>pink</string>
+				<string>mauve</string>
+				<string>red</string>
+				<string>maroon</string>
+				<string>peach</string>
+				<string>yellow</string>
+				<string>green</string>
+				<string>teal</string>
+				<string>sky</string>
+				<string>sapphire</string>
+				<string>blue</string>
+				<string>lavender</string>
+			</array>
+			<key>validTitles</key>
+			<array>
+				<string>Rosewater</string>
+				<string>Flamingo</string>
+				<string>Pink</string>
+				<string>Mauve</string>
+				<string>Red</string>
+				<string>Maroon</string>
+				<string>Peach</string>
+				<string>Yellow</string>
+				<string>Green</string>
+				<string>Teal</string>
+				<string>Sky</string>
+				<string>Sapphire</string>
+				<string>Blue</string>
+				<string>Lavender</string>
+			</array>
+			<key>PostNotification</key>
+			<string>com.catppuccin.ios.prefs/reload</string>
 		</dict>
 	</array>
 	<key>title</key>
-	<string>prefs</string>
+	<string>Catppuccin</string>
 </dict>
 </plist>
