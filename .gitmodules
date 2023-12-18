@@ -1,0 +1,3 @@
+[submodule "vendor/youtube"]
+	path = vendor/youtube
+	url = https://github.com/PoomSmart/YouTubeHeader

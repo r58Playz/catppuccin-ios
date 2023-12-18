@@ -4,8 +4,10 @@
 #import <Foundation/NSUserDefaults+Private.h>
 #import <UIKit/UIColor.h>
 
-#import "utils.h"
-#import "colors.h"
+#include "utils.h"
+#include "colors.h"
+
+#include "vendor/youtube/YTCommonColorPalette.h"
 
 static NSString *pref_flavor;
 static NSString *pref_accent;
@@ -15,6 +17,7 @@ static UIColor *accent;
 static UIColor *highlight;
 static NSDictionary *colorTable;
 static NSArray *colorBlacklist;
+static NSMutableArray *enabledIntegrations;
 
 static void loadPreferences();
 static UIColor *getColor(NSString *name);
@@ -288,16 +291,137 @@ static UIColor *getColorD(NSString *name, UIColor *orig);
 
 %end
 
+%group integration_youtube
+%hook YTCommonColorPalette
+- (UIColor *)background1 {%log;return colors[BASE];}
+- (UIColor *)background2 {%log;return colors[MANTLE];}
+- (UIColor *)background3 {%log;return colors[CRUST];}
+
+- (UIColor *)staticBlue {%log;return colors[BLUE];}
+
+- (UIColor *)brandBackgroundSolid {%log;return colors[MANTLE];}
+- (UIColor *)brandBackgroundPrimary {%log;return colors[MANTLE];}
+- (UIColor *)brandBackgroundSecondary {%log;return colors[CRUST];}
+
+- (UIColor *)generalBackgroundA {%log;return colors[BASE];}
+- (UIColor *)generalBackgroundB {%log;return colors[MANTLE];}
+- (UIColor *)generalBackgroundC {%log;return colors[CRUST];}
+
+- (UIColor *)errorBackground {%log;return colors[RED];}
+
+- (UIColor *)textPrimary {%log;return colors[TEXT];}
+- (UIColor *)textSecondary {%log;return colors[SUBTEXT0];}
+- (UIColor *)textDisabled {%log;return colors[OVERLAY0];}
+- (UIColor *)textPrimaryInverse {%log;return colors[BASE];}
+
+- (UIColor *)callToAction {%log;return colors[BASE];}
+
+- (UIColor *)iconActive {%log;return colors[TEXT];}
+- (UIColor *)iconActiveOther {%log;return colors[TEXT];}
+- (UIColor *)iconInactive {%log;return colors[SUBTEXT0];}
+- (UIColor *)iconDisabled {%log;return colors[OVERLAY2];}
+
+- (UIColor *)badgeChipBackground {%log;return colors[SURFACE0];}
+
+- (UIColor *)buttonChipBackgroundHover {%log;return colors[SURFACE0];}
+
+- (UIColor *)touchResponse {%log;return colors[SURFACE0];}
+
+- (UIColor *)callToActionInverse {%log;return colors[TEXT];}
+
+- (UIColor *)brandIconActive {%log;return colors[TEXT];}
+- (UIColor *)brandIconInactive {%log;return colors[SUBTEXT0];}
+
+- (UIColor *)brandButtonBackground {%log;return colors[SURFACE0];}
+
+- (UIColor *)brandLinkText {%log;return colors[TEXT];}
+
+- (UIColor *)tenPercentLayer {%log;return colors[SURFACE1];}
+
+- (UIColor *)snackbarBackground {%log;return colors[MANTLE];}
+
+- (UIColor *)themedBlue {%log;return colors[BLUE];}
+- (UIColor *)themedGreen {%log;return colors[GREEN];}
+
+- (UIColor *)staticBrandRed {%log;return colors[RED];}
+- (UIColor *)staticBrandWhite {%log;return colors[TEXT];}
+- (UIColor *)staticBrandBlack {%log;return colors[BASE];}
+- (UIColor *)staticClearColor {%log;return colors[BASE];}
+- (UIColor *)staticAdYellow {%log;return colors[YELLOW];}
+- (UIColor *)staticGrey {%log;return colors[OVERLAY0];}
+
+- (UIColor *)overlayBackgroundSolid {%log;return colors[BASE];}
+- (UIColor *)overlayBackgroundHeavy {%log;return colors[CRUST];}
+- (UIColor *)overlayBackgroundMedium {%log;return colors[MANTLE];}
+- (UIColor *)overlayBackgroundMediumLight {%log;return colors[BASE];}
+- (UIColor *)overlayBackgroundLight {%log;return colors[SURFACE0];}
+
+- (UIColor *)overlayTextPrimary {%log;return colors[TEXT];}
+- (UIColor *)overlayTextSecondary {%log;return colors[SUBTEXT0];}
+- (UIColor *)overlayTextTertiary {%log;return colors[OVERLAY2];}
+
+- (UIColor *)overlayIconActiveCallToAction {%log;return colors[SURFACE0];}
+- (UIColor *)overlayIconActiveOther {%log;return colors[SURFACE0];}
+- (UIColor *)overlayIconInactive {%log;return colors[BASE];}
+- (UIColor *)overlayIconDisabled {%log;return colors[BASE];}
+
+- (UIColor *)overlayFilledButtonActive {%log;return colors[SURFACE0];}
+
+- (UIColor *)overlayButtonSecondary {%log;return colors[SURFACE0];}
+- (UIColor *)overlayButtonPrimary {%log;return colors[SURFACE0];}
+
+- (UIColor *)overlayBackgroundBrand {%log;return colors[BASE];}
+- (UIColor *)overlayBackgroundClear {%log;return colors[BASE];}
+
+- (UIColor *)verifiedBadgeBackground {%log;return colors[TEXT];}
+
+- (UIColor *)themedOverlayBackground {%log;return colors[BASE];}
+
+- (UIColor *)adIndicator {%log;return colors[YELLOW];}
+- (UIColor *)errorIndicator {%log;return colors[RED];}
+
+- (UIColor *)baseBackground {%log;return colors[BASE];}
+- (UIColor *)raisedBackground {%log;return colors[BASE];}
+- (UIColor *)menuBackground {%log;return colors[MANTLE];}
+- (UIColor *)invertedBackground {%log;return colors[BASE];}
+- (UIColor *)additiveBackground {%log;return colors[BASE];}
+
+- (UIColor *)outline {%log;return colors[OVERLAY2];}
+%end
+%end
+
 
 static void loadPreferences() {
-	NSUserDefaults *preferences = [[NSUserDefaults alloc] initWithSuiteName:@"com.catppuccin.ios.prefs"];
-	if (preferences) {
-        pref_flavor = [preferences objectForKey:@"flavor"];
-        pref_accent = [preferences objectForKey:@"accent"];
+    // https://iphonedev.wiki/PreferenceBundles
+    BOOL isSystem = [NSHomeDirectory() isEqualToString:@"/var/mobile"];
+    NSDictionary* prefs = nil;
+    if(isSystem) {
+        CFArrayRef keyList = CFPreferencesCopyKeyList(CFSTR("com.catppuccin.ios.prefs"), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        if(keyList) {
+            prefs = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, CFSTR("com.catppuccin.ios.prefs"), kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+            if(!prefs) prefs = [NSDictionary new];
+            CFRelease(keyList);
+        }
+    }
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if (!prefs) {
+        if ([fileManager fileExistsAtPath:@"/var/jb/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist"])
+            prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/jb/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist"];
+        else
+            prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist"];
+    }
+	if (prefs) {
+        pref_flavor = [prefs objectForKey:@"flavor"];
+        pref_accent = [prefs objectForKey:@"accent"];
         colors = colorsFromHexStrings(flavorFromString(pref_flavor));
         accent = colors[accentFromString(pref_accent)];
         highlight = colorFromHexStringWithAlpha(flavorFromString(pref_flavor)[accentFromString(pref_accent)], 0.3);
         NSLog(@"ctpios: reloaded colors");
+
+        NSLog(@"ctpios: youtube integration %@", [prefs objectForKey:@"integration_youtube"]);
+        if ([prefs objectForKey:@"integration_youtube"]) {
+            [enabledIntegrations addObject:@"youtube"];
+        }
     }
 }
 
@@ -323,7 +447,7 @@ static UIColor *getColor(NSString *name) {
         // NSLog(@"ctpios: replaced %@ with %d", name, idx);
         return color;
     }
-    NSLog(@"ctpios: %@ not found", name);
+    // NSLog(@"ctpios: %@ not found", name);
     return nil;
 }
 
@@ -380,8 +504,14 @@ static UIColor *getColorD(NSString *name, UIColor *orig) {
         @"selectionHighlightColor": @HIGHLIGHT,
     };
     colorBlacklist = @[@"clearColor", @"_appKeyColor", @"_appKeyColorOrDefaultTint"];
+    enabledIntegrations = [NSMutableArray array];
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPreferences, CFSTR("com.catppuccin.ios.prefs/reload"), NULL, CFNotificationSuspensionBehaviorCoalesce);
     loadPreferences();
+
     %init(uihooks);
+    if ([enabledIntegrations containsObject:@"youtube"]) {
+        NSLog(@"ctpios: initializing youtube hooks");
+        %init(integration_youtube);
+    }
 }
