@@ -36,9 +36,10 @@
 
 ## Usage
 
-1. Clone this repository locally
-2. Install and configure Theos
-3. Run `make do` to compile and install the tweak to your device
+1. Clone this repository locally (with submodules!)
+2. Install Theos
+3. Run `make package FINALPACKAGE=1` to build the tweak 
+4. Install the built .deb
 
 <!-- this section is optional -->
 ## 🙋 FAQ
