@@ -38,7 +38,7 @@
 
 1. Clone this repository locally
 2. Install and configure Theos
-3. Run `make do` to install the package
+3. Run `make do` to compile and install the tweak to your device
 
 <!-- this section is optional -->
 ## 🙋 FAQ
