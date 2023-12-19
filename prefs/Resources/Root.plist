@@ -20,7 +20,7 @@
 			<key>default</key>
 			<string>mocha</string>
 			<key>defaults</key>
-			<string>com.catppuccin.ios.preferences</string>
+			<string>com.catppuccin.ios.prefs</string>
 			<key>key</key>
 			<string>flavor</string>
 			<key>validValues</key>
@@ -50,7 +50,7 @@
 			<key>default</key>
 			<string>mauve</string>
 			<key>defaults</key>
-			<string>com.catppuccin.ios.preferences</string>
+			<string>com.catppuccin.ios.prefs</string>
 			<key>key</key>
 			<string>accent</string>
 			<key>validValues</key>

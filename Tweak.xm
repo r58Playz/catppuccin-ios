@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "colors.h"
 
+#import "headers/UISUserInterfaceStyleMode.h"
 #include "vendor/youtube/YTCommonColorPalette.h"
 
 static NSString *pref_flavor;
@@ -413,12 +414,24 @@ static void loadPreferences() {
         colors = colorsFromHexStrings(flavorFromString(pref_flavor));
         accent = colors[accentFromString(pref_accent)];
         highlight = colorFromHexStringWithAlpha(flavorFromString(pref_flavor)[accentFromString(pref_accent)], 0.3);
-        NSLog(@"ctpios: reloaded colors");
+        NSLog(@"ctpios: reloaded colors flavor %@ accent %@", pref_flavor, pref_accent);
 
         NSLog(@"ctpios: youtube integration %@", [prefs objectForKey:@"integration_youtube"]);
         if ([prefs objectForKey:@"integration_youtube"]) {
             [enabledIntegrations addObject:@"youtube"];
         }
+    }
+
+    if ([[[NSProcessInfo processInfo] processName] isEqualToString:@"Preferences"]) {
+        UISUserInterfaceStyleMode *darkMode = [[%c(UISUserInterfaceStyleMode) alloc] init];
+        if ([pref_flavor isEqualToString:@"latte"]) {
+            [darkMode setModeValue:1];
+            darkMode.modeValue = 1;
+        } else {
+            [darkMode setModeValue:2];
+            darkMode.modeValue = 2;
+        }
+        NSLog(@"ctpios: set modeValue to %llu", darkMode.modeValue);
     }
 }
 
