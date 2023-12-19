@@ -3,6 +3,7 @@
 #import <Foundation/Foundation.h>
 #import <Foundation/NSUserDefaults+Private.h>
 #import <UIKit/UIColor.h>
+#import <rootless.h>
 
 #include "utils.h"
 #include "colors.h"
@@ -393,7 +394,7 @@ static UIColor *getColorD(NSString *name, UIColor *orig);
 
 static void loadPreferences() {
     // https://iphonedev.wiki/PreferenceBundles
-    BOOL isSystem = [NSHomeDirectory() isEqualToString:@"/var/mobile"];
+    BOOL isSystem = [NSHomeDirectory() isEqualToString:ROOT_PATH_NS(@"/var/mobile")];
     NSDictionary* prefs = nil;
     if(isSystem) {
         CFArrayRef keyList = CFPreferencesCopyKeyList(CFSTR("com.catppuccin.ios.prefs"), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
@@ -403,12 +404,8 @@ static void loadPreferences() {
             CFRelease(keyList);
         }
     }
-    NSFileManager *fileManager = [NSFileManager defaultManager];
     if (!prefs) {
-        if ([fileManager fileExistsAtPath:@"/var/jb/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist"])
-            prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/jb/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist"];
-        else
-            prefs = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist"];
+           prefs = [NSDictionary dictionaryWithContentsOfFile:ROOT_PATH_NS(@"/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist")];
     }
 	if (prefs) {
         pref_flavor = [prefs objectForKey:@"flavor"];
