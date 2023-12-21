@@ -37,5 +37,4 @@
     id restartAction = [SBSRelaunchAction actionWithReason:@"RestartRenderServer" options:4 targetURL:nil];
     [[FBSSystemService sharedService] sendActions:[NSSet setWithObject:restartAction] withResult:nil];
 }
-
 @end

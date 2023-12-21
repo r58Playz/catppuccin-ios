@@ -63,7 +63,7 @@ static NSArray *colorsFromHexStrings(NSArray *colors) {
 }
 
 // https://stackoverflow.com/a/18903483
-static UIColor* blend(UIColor* c1, UIColor* c2, float alpha) {
+static UIColor *blend(UIColor* c1, UIColor* c2, float alpha) {
     alpha = MIN(1.f, MAX( 0.f, alpha ));
     float beta = 1.f - alpha;
     CGFloat r1, g1, b1, a1, r2, g2, b2, a2;

@@ -60,8 +60,6 @@ static UIColor *getColorD(NSString *name, UIColor *orig);
 +(id)lightGrayColor { return getColorD(@"lightGrayColor", %orig); }
 +(id)brownColor { return getColorD(@"brownColor", %orig); }
 +(id)purpleColor { return getColorD(@"purpleColor", %orig); }
-+(id)readableTypeIdentifiersForItemProvider { return getColorD(@"readableTypeIdentifiersForItemProvider", %orig); }
-+(id)classFallbacksForKeyedArchiver { return getColorD(@"classFallbacksForKeyedArchiver", %orig); }
 +(id)whiteColor { return getColorD(@"whiteColor", %orig); }
 +(id)tableSeparatorColor { return getColorD(@"tableSeparatorColor", %orig); }
 +(id)yellowColor { return getColorD(@"yellowColor", %orig); }
@@ -70,7 +68,6 @@ static UIColor *getColorD(NSString *name, UIColor *orig);
 +(id)blackColor { return getColorD(@"blackColor", %orig); }
 +(id)placeholderTextColor { return getColorD(@"placeholderTextColor", %orig); }
 +(id)blueColor { return getColorD(@"blueColor", %orig); }
-+(id)writableTypeIdentifiersForItemProvider { return getColorD(@"writableTypeIdentifiersForItemProvider", %orig); }
 +(id)_secondarySystemBackgroundColor { return getColorD(@"_secondarySystemBackgroundColor", %orig); }
 +(id)_separatorColor { return getColorD(@"_separatorColor", %orig); }
 +(id)_switchOffColor { return getColorD(@"_switchOffColor", %orig); }
@@ -393,9 +390,18 @@ static UIColor *getColorD(NSString *name, UIColor *orig);
 %end
 
 
+static void setDarkMode(unsigned long long modeValue) {
+    if ([[[NSProcessInfo processInfo] processName] isEqualToString:@"Preferences"]) {
+        UISUserInterfaceStyleMode *darkMode = [[%c(UISUserInterfaceStyleMode) alloc] init];
+        [darkMode setModeValue:modeValue];
+        darkMode.modeValue = modeValue;
+        NSLog(@"ctpios: set modeValue to %llu", darkMode.modeValue);
+    }
+}
+
 static void loadPreferences() {
     // https://iphonedev.wiki/PreferenceBundles
-    BOOL isSystem = [NSHomeDirectory() isEqualToString:ROOT_PATH_NS(@"/var/mobile")];
+    BOOL isSystem = [NSHomeDirectory() isEqualToString:@"/var/mobile"];
     NSDictionary* prefs = nil;
     if(isSystem) {
         CFArrayRef keyList = CFPreferencesCopyKeyList(CFSTR("com.catppuccin.ios.prefs"), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
@@ -404,6 +410,7 @@ static void loadPreferences() {
             if(!prefs) prefs = [NSDictionary new];
             CFRelease(keyList);
         }
+        [[[NSUserDefaults alloc] initWithSuiteName:@"com.catppuccin.ios.preferences"] synchronize];
     }
     if (!prefs) {
            prefs = [NSDictionary dictionaryWithContentsOfFile:ROOT_PATH_NS(@"/var/mobile/Library/Preferences/com.catppuccin.ios.prefs.plist")];
@@ -421,17 +428,12 @@ static void loadPreferences() {
             [enabledIntegrations addObject:@"youtube"];
         }
     }
-
     if ([[[NSProcessInfo processInfo] processName] isEqualToString:@"Preferences"]) {
-        UISUserInterfaceStyleMode *darkMode = [[%c(UISUserInterfaceStyleMode) alloc] init];
         if ([pref_flavor isEqualToString:@"latte"]) {
-            [darkMode setModeValue:1];
-            darkMode.modeValue = 1;
+            setDarkMode(1);
         } else {
-            [darkMode setModeValue:2];
-            darkMode.modeValue = 2;
+            setDarkMode(2);
         }
-        NSLog(@"ctpios: set modeValue to %llu", darkMode.modeValue);
     }
 }
 
@@ -450,6 +452,35 @@ static UIColor *getColor(NSString *name) {
             case BASE_ACCENT:
                 color = blend(colors[BASE],accent,0.5);
                 break;
+            case ADAPTIVE_LIGHT:
+                if ([pref_flavor isEqualToString:@"latte"]) {
+                    color = colors[BASE];
+                } else {
+                    color = colors[TEXT];
+                }
+                break;
+            case ADAPTIVE_DARK:
+                if ([pref_flavor isEqualToString:@"latte"]) {
+                    color = colors[TEXT];
+                } else {
+                    color = colors[BASE];
+                }
+                break;
+            case HIGHTRANS_BASE:
+                color = [colors[BASE] colorWithAlphaComponent:0.3];
+                break;
+            case LOWTRANS_BASE:
+                color = [colors[BASE] colorWithAlphaComponent:0.7];
+                break;
+            case HIGHTRANS_TEXT:
+                color = [colors[TEXT] colorWithAlphaComponent:0.3];
+                break;
+            case MEDTRANS_TEXT:
+                color = [colors[TEXT] colorWithAlphaComponent:0.5];
+                break;
+            case LOWTRANS_TEXT:
+                color = [colors[TEXT] colorWithAlphaComponent:0.7];
+                break;
             default:
                 color = colors[idx];
                 break;
@@ -457,7 +488,7 @@ static UIColor *getColor(NSString *name) {
         // NSLog(@"ctpios: replaced %@ with %d", name, idx);
         return color;
     }
-    // NSLog(@"ctpios: %@ not found", name);
+    NSLog(@"ctpios: %@ not found", name);
     return nil;
 }
 
@@ -466,54 +497,135 @@ static UIColor *getColorD(NSString *name, UIColor *orig) {
     return color == nil ? orig : color;
 }
 
+
 %ctor {
     colorTable = @{
-        @"lightTextColor": @TEXT,
-        @"darkTextColor": @TEXT,
-        @"labelColor": @TEXT,
-        @"placeholderTextColor": @SUBTEXT0,
-        @"quaternaryLabelColor": @OVERLAY0,
-        @"quaternarySystemFillColor": @CRUST,
-        @"secondaryLabelColor": @SUBTEXT0,
-        @"secondarySystemBackgroundColor": @BASE,
-        @"secondarySystemFillColor": @MANTLE,
-        @"systemBlackColor": @OVERLAY2,
-        @"systemFillColor": @BASE,
-        @"systemGray5Color": @BASE_ACCENT,
+        @"systemBackgroundColor": @BASE,
+        @"secondarySystemBackgroundColor": @SURFACE0,
+        @"tertiarySystemBackgroundColor": @SURFACE1,
+
         @"systemGroupedBackgroundColor": @BASE,
+        @"secondarySystemGroupedBackgroundColor": @SURFACE0,
+        @"tertiarySystemGroupedBackgroundColor": @SURFACE1,
+        @"systemGroupBackgroundColor": @BASE,
+        @"systemGroupBackgroundCellColor": @SURFACE0,
+        @"groupTableViewBackgroundColor": @BASE,
+
+        @"systemGray6Color": @SURFACE0,
+        @"systemGray5Color": @SURFACE1,
+        @"systemGray4Color": @SURFACE2,
+        @"systemGray3Color": @OVERLAY0,
+        @"systemGray2Color": @OVERLAY1,
+        @"systemGrayColor": @OVERLAY2,
+
+        @"_labelColor": @TEXT,
+        @"labelColor": @TEXT,
+        @"_secondaryLabelColor": @SUBTEXT1,
+        @"secondaryLabelColor": @SUBTEXT1,
+        @"tertiaryLabelColor": @SUBTEXT0,
+        @"quaternaryLabelColor": @OVERLAY2,
+        @"placeholderTextColor": @SUBTEXT0,
+        @"darkTextColor": @BASE,
+        @"lightTextColor": @TEXT,
+        @"groupTableHeaderFooterTextColor": @TEXT,
+        @"plainTableHeaderFooterTextColor": @TEXT,
+        @"tableCellGrayTextColor": @TEXT,
+        @"tableCellBlueTextColor": @TEXT,
+
+        @"systemFillColor": @SURFACE0,
+        @"secondarySystemFillColor": @SURFACE0,
+        @"tertiarySystemFillColor": @SURFACE0,
+        @"quaternarySystemFillColor": @SURFACE0,
+        @"fillColor": @SURFACE0,
+        @"secondaryFillColor": @SURFACE0,
+        @"tertiaryFillColor": @SURFACE0,
+        @"quaternaryFillColor": @SURFACE0,
+
+        @"separatorColor": @OVERLAY1,
+        @"opaqueSeparatorColor": @OVERLAY1,
+        @"lineSeparatorColor": @OVERLAY1,
+        @"tableSeparatorColor": @OVERLAY1,
+        @"tableSeparatorDarkColor": @OVERLAY1,
+        @"tableSeparatorLightColor": @OVERLAY1,
+        @"tableGroupedSeparatorLightColor": @OVERLAY1,
+
+        @"tableBackgroundColor": @BASE,
+        @"tableCellBackgroundColor": @MANTLE,
+        @"tableCellPlainBackgroundColor": @MANTLE,
+        @"tableCellPlainSelectedBackgroundColor": @SURFACE2,
+        @"tableCellGroupedBackgroundColor": @MANTLE,
+        @"tableCellGroupedSelectedBackgroundColor": @SURFACE2,
+        @"tableCellGroupedBackgroundColorLegacyWhite": @MANTLE,
+
+        @"whiteColor": @ADAPTIVE_LIGHT,
+        @"blackColor": @ADAPTIVE_DARK,
+        @"indigoColor": @BLUE,
+        @"orangeColor": @PEACH,
+        @"pinkColor": @PINK,
+        @"purpleColor": @MAUVE,
+        @"tealColor": @TEAL,
+        @"cyanColor": @TEAL,
+        @"greenColor": @GREEN,
+        @"redColor": @RED,
+        @"yellowColor": @YELLOW,
+        @"darkGrayColor": @SURFACE1,
+        @"grayColor": @OVERLAY0,
+        @"lightGrayColor": @OVERLAY2,
+
+        @"systemWhiteColor": @ADAPTIVE_LIGHT,
+        @"systemBlackColor": @ADAPTIVE_DARK,
         @"systemIndigoColor": @BLUE,
         @"systemOrangeColor": @PEACH,
         @"systemPinkColor": @PINK,
         @"systemPurpleColor": @MAUVE,
         @"systemTealColor": @TEAL,
-        @"systemWhiteColor": @BASE,
+        @"systemCyanColor": @TEAL,
         @"systemGreenColor": @GREEN,
         @"systemRedColor": @RED,
         @"systemYellowColor": @YELLOW,
-        @"tableBackgroundColor": @BASE,
-        @"tableCellGroupedBackgroundColor": @MANTLE,
-        @"tableCellPlainBackgroundColor": @BASE,
-        @"tableCellPlainSelectedBackgroundColor": @BASE_ACCENT,
-        @"tertiaryLabelColor": @OVERLAY2,
-        @"tertiarySystemBackgroundColor": @CRUST,
 
-
-        @"systemBackgroundColor":@BASE,
-        @"groupTableViewBackgroundColor": @BASE,
-
-        @"_textFieldBackgroundColor": @SURFACE0,
-        @"_textFieldBorderColor": @OVERLAY0,
+        @"externalSystemWhiteColor": @ADAPTIVE_LIGHT,
+        @"externalSystemBlackColor": @ADAPTIVE_DARK,
+        @"externalSystemIndigoColor": @BLUE,
+        @"externalSystemOrangeColor": @PEACH,
+        @"externalSystemPinkColor": @PINK,
+        @"externalSystemPurpleColor": @MAUVE,
+        @"externalSystemTealColor": @TEAL,
+        @"externalSystemCyanColor": @TEAL,
+        @"externalSystemGreenColor": @GREEN,
+        @"externalSystemRedColor": @RED,
+        @"externalSystemYellowColor": @YELLOW,
 
         @"systemBlueColor": @ACCENT,
         @"systemBlueColor2": @ACCENT,
+        @"blueColor": @ACCENT,
         @"linkColor": @ACCENT,
         @"insertionPointColor": @ACCENT,
         @"selectionGrabberColor": @ACCENT,
         @"tintColor": @ACCENT,
+        @"_alternateSystemInteractionTintColor": @ACCENT,
+        @"_carSystemFocusColor": @ACCENT,
+        @"_appKeyColor": @ACCENT,
+        @"_appKeyColorOrDefaultTint": @ACCENT,
+        @"tableCellDefaultSelectionTintColor": @ACCENT,
 
         @"selectionHighlightColor": @HIGHLIGHT,
+
+        @"_textFieldBorderColor": @OVERLAY0,
+        @"_textFieldBackgroundColor": @SURFACE0,
+        @"_switchOffColor": @SURFACE0,
+        @"_switchOffImageColor": @SURFACE0,
+        @"_systemChromeShadowColor": @HIGHTRANS_BASE,
+        @"_controlShadowColor": @HIGHTRANS_BASE,
+        @"_dimmingViewColor": @HIGHTRANS_BASE,
+        @"_alertControllerDimmingViewColor": @HIGHTRANS_BASE,
+        @"_pageControlPlatterIndicatorColor": @HIGHTRANS_TEXT,
+        @"_pageControlIndicatorColor": @LOWTRANS_TEXT,
+        @"_controlForegroundColor": @HIGHTRANS_TEXT,
+        @"_splitViewBorderColor": @OVERLAY0,
+        @"_windowBackgroundColor": @BASE,
     };
-    colorBlacklist = @[@"clearColor", @"_appKeyColor", @"_appKeyColorOrDefaultTint"];
+    colorBlacklist = @[@"clearColor", @"__halfTransparentWhiteColor"];
     enabledIntegrations = [NSMutableArray array];
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPreferences, CFSTR("com.catppuccin.ios.prefs/reload"), NULL, CFNotificationSuspensionBehaviorCoalesce);

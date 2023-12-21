@@ -30,6 +30,13 @@
 #define ACCENT 26
 #define HIGHLIGHT 27
 #define BASE_ACCENT 28
+#define ADAPTIVE_LIGHT 29
+#define ADAPTIVE_DARK 30
+#define HIGHTRANS_BASE 31
+#define LOWTRANS_BASE 32
+#define HIGHTRANS_TEXT 33
+#define MEDTRANS_TEXT 34
+#define LOWTRANS_TEXT 35
 
 static NSArray *flavorFromString(NSString *flavor) {
     if([flavor isEqualToString:@"latte"]) {
@@ -73,5 +80,4 @@ static int accentFromString(NSString *color) {
     }
     return MAUVE;
 }
-
 

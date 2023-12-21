@@ -14,8 +14,6 @@
 +(id)lightGrayColor;
 +(id)brownColor;
 +(id)purpleColor;
-+(id)readableTypeIdentifiersForItemProvider;
-+(id)classFallbacksForKeyedArchiver;
 +(id)whiteColor;
 +(id)tableSeparatorColor;
 +(id)yellowColor;
@@ -24,7 +22,6 @@
 +(id)blackColor;
 +(id)placeholderTextColor;
 +(id)blueColor;
-+(id)writableTypeIdentifiersForItemProvider;
 +(id)_secondarySystemBackgroundColor;
 +(id)_separatorColor;
 +(id)_switchOffColor;
