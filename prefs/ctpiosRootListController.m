@@ -30,11 +30,17 @@
     return self;
 }
 
-- (void)respring:(UIButton *)sender {
+- (void)respring {
     Class FBSSystemService = objc_getClass("FBSSystemService");
     Class SBSRelaunchAction = objc_getClass("SBSRelaunchAction");
 
     id restartAction = [SBSRelaunchAction actionWithReason:@"RestartRenderServer" options:4 targetURL:nil];
     [[FBSSystemService sharedService] sendActions:[NSSet setWithObject:restartAction] withResult:nil];
+}
+
+- (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
+     [super setPreferenceValue:value specifier:specifier];
+     [[[NSUserDefaults alloc] initWithSuiteName:@"com.catppuccin.ios.preferences"] synchronize];
+     [self respring];
 }
 @end

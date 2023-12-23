@@ -32,11 +32,14 @@
 #define BASE_ACCENT 28
 #define ADAPTIVE_LIGHT 29
 #define ADAPTIVE_DARK 30
-#define HIGHTRANS_BASE 31
-#define LOWTRANS_BASE 32
-#define HIGHTRANS_TEXT 33
-#define MEDTRANS_TEXT 34
-#define LOWTRANS_TEXT 35
+#define TRANSPARENT 31
+#define HIGHTRANS_BASE 32
+#define MEDTRANS_BASE 33
+#define LOWTRANS_BASE 34
+#define HIGHTRANS_TEXT 35
+#define MEDTRANS_TEXT 36
+#define LOWTRANS_TEXT 37
+#define MEDTRANS_OVERLAY0 38
 
 static NSArray *flavorFromString(NSString *flavor) {
     if([flavor isEqualToString:@"latte"]) {
@@ -81,3 +84,61 @@ static int accentFromString(NSString *color) {
     return MAUVE;
 }
 
+static UIColor *getColor(int idx) {
+    UIColor *color;
+    // stopwatch view
+    NSArray *weirdApps = @[@"MobileTimer"];
+    switch(idx) {
+        case ACCENT:
+            color = accent;
+            break;
+        case HIGHLIGHT:
+            color = highlight;
+            break;
+        case BASE_ACCENT:
+            color = blend(colors[BASE],accent,0.5);
+            break;
+        case ADAPTIVE_LIGHT:
+            if ([pref_flavor isEqualToString:@"latte"] && ![weirdApps containsObject:PROCESS_NAME]) {
+                color = colors[BASE];
+            } else {
+                color = colors[TEXT];
+            }
+            break;
+        case ADAPTIVE_DARK:
+            if ([pref_flavor isEqualToString:@"latte"] && ![weirdApps containsObject:PROCESS_NAME]) {
+                color = colors[TEXT];
+            } else {
+                color = colors[BASE];
+            }
+            break;
+        case HIGHTRANS_BASE:
+            color = [colors[BASE] colorWithAlphaComponent:0.3];
+            break;
+        case MEDTRANS_BASE:
+            color = [colors[BASE] colorWithAlphaComponent:0.5];
+            break;
+        case LOWTRANS_BASE:
+            color = [colors[BASE] colorWithAlphaComponent:0.7];
+            break;
+        case HIGHTRANS_TEXT:
+            color = [colors[TEXT] colorWithAlphaComponent:0.3];
+            break;
+        case MEDTRANS_TEXT:
+            color = [colors[TEXT] colorWithAlphaComponent:0.5];
+            break;
+        case LOWTRANS_TEXT:
+            color = [colors[TEXT] colorWithAlphaComponent:0.7];
+            break;
+        case MEDTRANS_OVERLAY0:
+            color = [colors[OVERLAY0] colorWithAlphaComponent:0.5];
+            break;
+        case TRANSPARENT:
+            color = [UIColor colorWithWhite:0.0 alpha:0.0];
+            break;
+        default:
+            color = colors[idx];
+            break;
+    }
+    return color;
+}
