@@ -303,11 +303,19 @@ static UIColor *getColorFromUIKitTableD(NSString *name, UIColor *orig) {
 
 %hook _UIVisualEffectBackdropView 
 -(void)setFilters:(NSArray *)arg1 {
+    NSLog(@"filters: %@", arg1);
+    __block BOOL hasBlur = NO;
     NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
-        return [[object filterType] isEqualToString:@"gaussianBlur"];
+        BOOL isBlur = [[object filterType] isEqualToString:@"gaussianBlur"];
+        hasBlur = hasBlur || isBlur;
+        return isBlur;
     }];
     NSArray *filtered = [arg1 filteredArrayUsingPredicate:predicate];
-    self.backgroundColor = getColorFromUIKitTable(@"ctpios_tabBarBackgroundColor");
+    if (hasBlur) {
+        self.backgroundColor = getColorFromUIKitTable(@"ctpios_tabBarBackgroundColor");
+    } else {
+        filtered = arg1;
+    }
     %orig(filtered);
 }
 
@@ -451,7 +459,7 @@ static void initUIKitHook() {
 
         @"ctpios_tabBarBackgroundColor": @MEDTRANS_SURFACE0,
     };
-    UIKitColorBlacklist = @[@"clearColor", @"__halfTransparentWhiteColor", @"__halfTransparentWhiteColor"];
+    UIKitColorBlacklist = @[@"clearColor", @"__halfTransparentWhiteColor", @"__halfTransparentBlackColor"];
 
     %init(uikithooks);
 }
