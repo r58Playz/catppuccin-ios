@@ -40,6 +40,7 @@
 #define MEDTRANS_TEXT 36
 #define LOWTRANS_TEXT 37
 #define MEDTRANS_OVERLAY0 38
+#define MEDTRANS_SURFACE0 39
 
 static NSArray *flavorFromString(NSString *flavor) {
     if([flavor isEqualToString:@"latte"]) {
@@ -132,6 +133,9 @@ static UIColor *getColor(int idx) {
             break;
         case MEDTRANS_OVERLAY0:
             color = [colors[OVERLAY0] colorWithAlphaComponent:0.5];
+            break;
+        case MEDTRANS_SURFACE0:
+            color = [colors[SURFACE0] colorWithAlphaComponent:0.5];
             break;
         case TRANSPARENT:
             color = [UIColor colorWithWhite:0.0 alpha:0.0];

@@ -2,6 +2,8 @@
 
 #import <UIKit/UILabel.h>
 #import <UIKit/UITabBar.h>
+#import "headers/_UIVisualEffectBackdropView.h"
+#import "headers/_UIVisualEffectFilterEntry.h"
 
 static NSDictionary *UIKitColorTable;
 static NSArray *UIKitColorBlacklist;
@@ -299,6 +301,18 @@ static UIColor *getColorFromUIKitTableD(NSString *name, UIColor *orig) {
 }
 %end
 
+%hook _UIVisualEffectBackdropView 
+-(void)setFilters:(NSArray *)arg1 {
+    NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+        return [[object filterType] isEqualToString:@"gaussianBlur"];
+    }];
+    NSArray *filtered = [arg1 filteredArrayUsingPredicate:predicate];
+    self.backgroundColor = getColorFromUIKitTable(@"ctpios_tabBarBackgroundColor");
+    %orig(filtered);
+}
+
+%end
+
 %end
 
 static void initUIKitHook() {
@@ -432,13 +446,12 @@ static void initUIKitHook() {
         @"_alertControllerDimmingViewColor": @HIGHTRANS_BASE,
         @"_pageControlPlatterIndicatorColor": @HIGHTRANS_TEXT,
         @"_pageControlIndicatorColor": @LOWTRANS_TEXT,
-        @"_controlForegroundColor": @HIGHTRANS_TEXT,
         @"_splitViewBorderColor": @OVERLAY0,
         @"_barStyleBlackHairlineShadowColor": @HIGHTRANS_TEXT,
 
-        @"ctpios_tabBarBackgroundColor": @TRANSPARENT,
+        @"ctpios_tabBarBackgroundColor": @MEDTRANS_SURFACE0,
     };
-    UIKitColorBlacklist = @[@"clearColor", @"__halfTransparentWhiteColor"];
+    UIKitColorBlacklist = @[@"clearColor", @"__halfTransparentWhiteColor", @"__halfTransparentWhiteColor"];
 
     %init(uikithooks);
 }
