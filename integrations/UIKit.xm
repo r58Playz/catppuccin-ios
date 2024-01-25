@@ -5,7 +5,7 @@
 #import "headers/_UIVisualEffectBackdropView.h"
 #import "headers/_UIVisualEffectFilterEntry.h"
 
-static NSDictionary *UIKitColorTable;
+static NSMutableDictionary *UIKitColorTable;
 static NSArray *UIKitColorBlacklist;
 
 static UIColor *getColorFromUIKitTable(NSString *name) {
@@ -303,7 +303,6 @@ static UIColor *getColorFromUIKitTableD(NSString *name, UIColor *orig) {
 
 %hook _UIVisualEffectBackdropView 
 -(void)setFilters:(NSArray *)arg1 {
-    NSLog(@"filters: %@", arg1);
     __block BOOL hasBlur = NO;
     NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
         BOOL isBlur = [[object filterType] isEqualToString:@"gaussianBlur"];
@@ -324,7 +323,7 @@ static UIColor *getColorFromUIKitTableD(NSString *name, UIColor *orig) {
 %end
 
 static void initUIKitHook() {
-    UIKitColorTable = @{
+    UIKitColorTable = [@{
         @"_windowBackgroundColor": @BASE,
         @"systemBackgroundColor": @BASE,
         @"_systemBackgroundColor": @BASE,
@@ -395,6 +394,7 @@ static void initUIKitHook() {
         @"orangeColor": @PEACH,
         @"pinkColor": @PINK,
         @"purpleColor": @MAUVE,
+        @"magentaColor": @MAUVE,
         @"tealColor": @TEAL,
         @"cyanColor": @TEAL,
         @"greenColor": @GREEN,
@@ -410,6 +410,8 @@ static void initUIKitHook() {
         @"systemOrangeColor": @PEACH,
         @"systemPinkColor": @PINK,
         @"systemPurpleColor": @MAUVE,
+        @"systemMagentaColor": @MAUVE,
+        @"systemMintColor": @TEAL,
         @"systemTealColor": @TEAL,
         @"systemCyanColor": @TEAL,
         @"systemGreenColor": @GREEN,
@@ -428,13 +430,14 @@ static void initUIKitHook() {
         @"externalSystemRedColor": @RED,
         @"externalSystemYellowColor": @YELLOW,
 
-        @"systemBlueColor": @ACCENT,
-        @"systemBlueColor2": @ACCENT,
-        @"_systemBlueColor2": @ACCENT,
-        @"blueColor": @ACCENT,
+        @"__swiftColor": @PEACH,
+        @"__systemDestructiveTintColor": @RED,
+
         @"linkColor": @ACCENT,
         @"insertionPointColor": @ACCENT,
         @"selectionGrabberColor": @ACCENT,
+        @"textFieldAtomPurpleColor": @ACCENT,
+        @"_systemInteractionTintColor": @ACCENT,
         @"tintColor": @ACCENT,
         @"_carSystemFocusColor": @ACCENT,
         @"_appKeyColor": @ACCENT,
@@ -458,8 +461,26 @@ static void initUIKitHook() {
         @"_barStyleBlackHairlineShadowColor": @HIGHTRANS_TEXT,
 
         @"ctpios_tabBarBackgroundColor": @MEDTRANS_SURFACE0,
-    };
+    } mutableCopy];
     UIKitColorBlacklist = @[@"clearColor", @"__halfTransparentWhiteColor", @"__halfTransparentBlackColor"];
+
+    if ([enabledTweaks containsObject:@"blue_is_accent"]) {
+        NSDictionary *dict = @{
+            @"systemBlueColor": @ACCENT,
+            @"systemBlueColor2": @ACCENT,
+            @"_systemBlueColor2": @ACCENT,
+            @"blueColor": @ACCENT,
+        };
+        [UIKitColorTable addEntriesFromDictionary:dict];
+    } else {
+        NSDictionary *dict = @{
+            @"systemBlueColor": @BLUE,
+            @"systemBlueColor2": @BLUE,
+            @"_systemBlueColor2": @BLUE,
+            @"blueColor": @BLUE,
+        };
+        [UIKitColorTable addEntriesFromDictionary:dict];
+    }
 
     %init(uikithooks);
 }

@@ -14,6 +14,7 @@ static NSString *pref_flavor;
 static NSString *pref_accent;
 
 static NSMutableArray *enabledIntegrations;
+static NSMutableArray *enabledTweaks;
 
 static NSArray *applicationBlacklist;
 
@@ -58,12 +59,18 @@ static void loadPreferences() {
         highlight = colorFromHexStringWithAlpha(flavorFromString(pref_flavor)[accentFromString(pref_accent)], 0.3);
         NSLog(@"ctpios: reloaded colors flavor %@ accent %@", pref_flavor, pref_accent);
 
-        NSLog(@"ctpios: youtube integration %@", [prefs objectForKey:@"integration_youtube"]);
+        if ([prefs objectForKey:@"tweak_blue_is_accent"]) {
+            [enabledTweaks addObject:@"blue_is_accent"];
+        }
+
         if ([prefs objectForKey:@"integration_youtube"]) {
             [enabledIntegrations addObject:@"youtube"];
         }
+
+        NSLog(@"ctpios: enabledTweaks %@", enabledTweaks);
+        NSLog(@"ctpios: enabledIntegrations %@", enabledIntegrations);
     }
-    if ([[[NSProcessInfo processInfo] processName] isEqualToString:@"Preferences"]) {
+    if ([PROCESS_NAME isEqualToString:@"Preferences"]) {
         if ([pref_flavor isEqualToString:@"latte"]) {
             setDarkMode(1);
         } else {
@@ -74,6 +81,7 @@ static void loadPreferences() {
 
 
 %ctor {
+    enabledTweaks = [NSMutableArray array];
     enabledIntegrations = [NSMutableArray array];
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPreferences, CFSTR("com.catppuccin.ios.prefs/reload"), NULL, CFNotificationSuspensionBehaviorCoalesce);
