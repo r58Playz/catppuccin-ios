@@ -430,8 +430,8 @@ static void initUIKitHook() {
         @"externalSystemRedColor": @RED,
         @"externalSystemYellowColor": @YELLOW,
 
-        @"__swiftColor": @PEACH,
-        @"__systemDestructiveTintColor": @RED,
+        @"_swiftColor": @PEACH,
+        @"_systemDestructiveTintColor": @RED,
 
         @"linkColor": @ACCENT,
         @"insertionPointColor": @ACCENT,
