@@ -18,7 +18,7 @@ static NSMutableArray *enabledTweaks;
 
 static NSArray *applicationBlacklist;
 
-static NSString *PROCESS_NAME = [[NSProcessInfo processInfo] processName];
+static NSString *PROCESS_NAME;
 
 #include "utils.h"
 #include "colors.h"
@@ -67,6 +67,10 @@ static void loadPreferences() {
             [enabledIntegrations addObject:@"youtube"];
         }
 
+        if ([prefs objectForKey:@"integration_github"]) {
+            [enabledIntegrations addObject:@"github"];
+        }
+
         NSLog(@"ctpios: enabledTweaks %@", enabledTweaks);
         NSLog(@"ctpios: enabledIntegrations %@", enabledIntegrations);
     }
@@ -81,17 +85,24 @@ static void loadPreferences() {
 
 
 %ctor {
+    PROCESS_NAME = [[NSProcessInfo processInfo] processName];
     enabledTweaks = [NSMutableArray array];
     enabledIntegrations = [NSMutableArray array];
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPreferences, CFSTR("com.catppuccin.ios.prefs/reload"), NULL, CFNotificationSuspensionBehaviorCoalesce);
     loadPreferences();
 
+    NSLog(@"ctpios: process name %@", PROCESS_NAME);
     NSLog(@"ctpios: initializing uikit hooks");
     initUIKitHook();
 
     if ([enabledIntegrations containsObject:@"youtube"]) {
         NSLog(@"ctpios: initializing youtube hooks");
         %init(integration_youtube);
+    }
+
+    if ([enabledIntegrations containsObject:@"github"] && [PROCESS_NAME isEqualToString:@"GitHub"]) {
+        NSLog(@"ctpios: initializing github hooks");
+        initGitHubHook();
     }
 }

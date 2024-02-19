@@ -29,7 +29,7 @@
 #define CRUST 25
 #define ACCENT 26
 #define HIGHLIGHT 27
-#define BASE_ACCENT 28
+#define BASE_50_ACCENT 28
 #define ADAPTIVE_LIGHT 29
 #define ADAPTIVE_DARK 30
 #define TRANSPARENT 31
@@ -40,7 +40,9 @@
 #define MEDTRANS_TEXT 36
 #define LOWTRANS_TEXT 37
 #define MEDTRANS_OVERLAY0 38
-#define MEDTRANS_SURFACE0 39
+#define LOWTRANS_SURFACE0 39
+#define BASE_25_GREEN 40
+#define BASE_25_RED 41
 
 static NSArray *flavorFromString(NSString *flavor) {
     if([flavor isEqualToString:@"latte"]) {
@@ -96,7 +98,7 @@ static UIColor *getColor(int idx) {
         case HIGHLIGHT:
             color = highlight;
             break;
-        case BASE_ACCENT:
+        case BASE_50_ACCENT:
             color = blend(colors[BASE],accent,0.5);
             break;
         case ADAPTIVE_LIGHT:
@@ -134,8 +136,14 @@ static UIColor *getColor(int idx) {
         case MEDTRANS_OVERLAY0:
             color = [colors[OVERLAY0] colorWithAlphaComponent:0.5];
             break;
-        case MEDTRANS_SURFACE0:
-            color = [colors[SURFACE0] colorWithAlphaComponent:0.5];
+        case LOWTRANS_SURFACE0:
+            color = [colors[SURFACE0] colorWithAlphaComponent:0.7];
+            break;
+        case BASE_25_GREEN:
+            color = blend(colors[BASE],colors[GREEN],0.5);
+            break;
+        case BASE_25_RED:
+            color = blend(colors[BASE],colors[GREEN],0.5);
             break;
         case TRANSPARENT:
             color = [UIColor colorWithWhite:0.0 alpha:0.0];

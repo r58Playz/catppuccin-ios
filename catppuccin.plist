@@ -2,7 +2,8 @@
     Filter = {
         Bundles = (
             "com.apple.UIKit",
-            "com.google.ios.youtube"
+            "com.google.ios.youtube",
+            "com.github.stormbreaker.prod"
         );
     };
 }

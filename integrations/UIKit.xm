@@ -460,7 +460,7 @@ static void initUIKitHook() {
         @"_splitViewBorderColor": @OVERLAY0,
         @"_barStyleBlackHairlineShadowColor": @HIGHTRANS_TEXT,
 
-        @"ctpios_tabBarBackgroundColor": @MEDTRANS_SURFACE0,
+        @"ctpios_tabBarBackgroundColor": @LOWTRANS_SURFACE0,
     } mutableCopy];
     UIKitColorBlacklist = @[@"clearColor", @"__halfTransparentWhiteColor", @"__halfTransparentBlackColor"];
 
