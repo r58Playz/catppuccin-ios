@@ -34,7 +34,8 @@
     Class FBSSystemService = objc_getClass("FBSSystemService");
     Class SBSRelaunchAction = objc_getClass("SBSRelaunchAction");
 
-    id restartAction = [SBSRelaunchAction actionWithReason:@"RestartRenderServer" options:4 targetURL:nil];
+    NSURL *relaunchURL = [NSURL URLWithString:@"prefs:root=Catppuccin"];
+    id restartAction = [SBSRelaunchAction actionWithReason:@"RestartRenderServer" options:4 targetURL:relaunchURL];
     [[FBSSystemService sharedService] sendActions:[NSSet setWithObject:restartAction] withResult:nil];
 }
 

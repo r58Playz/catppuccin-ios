@@ -2,6 +2,8 @@
 
 #import "vendor/youtube/YTCommonColorPalette.h"
 #import "vendor/youtube/YTColorPalette.h"
+#import "vendor/youtube/_ASDisplayView.h"
+#import "vendor/youtube/ASTextNode.h"
 
 %group integration_youtube
 %hook YTCommonColorPalette
@@ -176,7 +178,7 @@
             subview.backgroundColor = getColor(BASE);
         }
     }
-    %orig(arg1);
+    %orig;
 }
 %end
 
@@ -187,6 +189,7 @@
 %hook YTWatchView
 -(void)didMoveToWindow {
     self.watchNextView.backgroundColor = getColor(BASE);
+    %orig;
 }
 %end
 
@@ -202,8 +205,66 @@
 %hook YTWatchRoundedCornersView
 -(void)didMoveToWindow {
     self.backgroundColor = getColor(BASE);
+    %orig;
+}
+%end
+
+%hook ASDisplayNode 
+-(void)didLoad {
+    if ([self.accessibilityIdentifier isEqualToString:@"dot-decoration-id"]) {
+        self.backgroundColor = getColor(ACCENT);
+        self.yogaParent.backgroundColor = getColor(SURFACE1);
+    }
+    %orig;
+}
+%end
+
+%hook ASTextNode
+-(void)didLoad {
+    NSString *parentId = self.yogaParent.accessibilityIdentifier;
+    NSString *parentParentId = self.yogaParent.yogaParent.accessibilityIdentifier;
+
+    if ([parentId isEqualToString:@"subs_channel_list.all_button"]) {
+        NSMutableAttributedString *str = [self.attributedText mutableCopy];
+        [str addAttribute:NSForegroundColorAttributeName value:getColor(ACCENT) range:NSMakeRange(0,[str length])];
+        self.attributedText = str;
+    } else if (
+        [parentId isEqualToString:@"channel-bar-channel-id"] ||
+        [parentParentId isEqualToString:@"eml.metadata"]
+    ) {
+        NSMutableAttributedString *str = [self.attributedText mutableCopy];
+        [str addAttribute:NSForegroundColorAttributeName value:getColor(TEXT) range:NSMakeRange(0,[str length])];
+        self.attributedText = str;
+    }
+}
+%end
+
+%hook YTInlinePlayerBarContainerView
+- (id)quietProgressBarColor {
+    return getColor(ACCENT);
+}
+%end
+
+%hook YTSegmentableInlinePlayerBarView
+-(void)resetPlayerBarModeColors {
+    %orig;
+    MSHookIvar<UIColor*>(self, "_progressBarColor") = getColor(ACCENT);
+    MSHookIvar<UIColor*>(self, "_userIsScrubbingProgressBarColor") = getColor(ACCENT);
+    MSHookIvar<UIColor*>(self, "_bufferedProgressBarColor") = getColor(OVERLAY0);
+    MSHookIvar<UIColor*>(self, "_unbufferedProgressBarColor") = getColor(SURFACE1);
+    MSHookIvar<UIColor*>(self, "_linearLiveStreamSeekableProgressColor") = getColor(ACCENT);
+    MSHookIvar<UIView*>(self, "_scrubberCircle").backgroundColor = getColor(ACCENT);
+}
+%end
+
+%hook YTProgressView
+-(void)setProgressBarColor:(id)arg1 {
+    %orig(getColor(ACCENT));
 }
 %end
 
 %end
 
+void initYoutubeHook() {
+    %init(integration_youtube);
+}

@@ -96,9 +96,9 @@ static void loadPreferences() {
     NSLog(@"ctpios: initializing uikit hooks");
     initUIKitHook();
 
-    if ([enabledIntegrations containsObject:@"youtube"]) {
+    if ([enabledIntegrations containsObject:@"youtube"] && [PROCESS_NAME isEqualToString:@"YouTube"]) {
         NSLog(@"ctpios: initializing youtube hooks");
-        %init(integration_youtube);
+        initYoutubeHook();
     }
 
     if ([enabledIntegrations containsObject:@"github"] && [PROCESS_NAME isEqualToString:@"GitHub"]) {
