@@ -101,7 +101,10 @@ static void loadPreferences() {
         initYoutubeHook();
     }
 
-    if ([enabledIntegrations containsObject:@"github"] && [PROCESS_NAME isEqualToString:@"GitHub"]) {
+    if ([enabledIntegrations containsObject:@"github"] && (
+        [PROCESS_NAME isEqualToString:@"GitHub"] ||
+        [PROCESS_NAME isEqualToString:@"ContributionGraphWidget"]
+    )) {
         NSLog(@"ctpios: initializing github hooks");
         initGitHubHook();
     }

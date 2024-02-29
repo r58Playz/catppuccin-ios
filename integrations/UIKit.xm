@@ -322,6 +322,26 @@ static UIColor *getColorFromUIKitTableD(NSString *name, UIColor *orig) {
 
 %end
 
+%group uikithooks_calculator
+
+%hook Calculator.CalculatorKeypadButton
+// this isn't much better
+-(void)didMoveToWindow {
+    NSString *str = [(NSAttributedString*)[self performSelector:@selector(accessibilityCalculatorAttributedText)] string];
+    if ([@[@"AC", @"+/−", @"%"] containsObject:str]) {
+        ((UIView*)self).backgroundColor = getColor(SURFACE1);
+        ((UILabel*)((UIView*)self).subviews[0]).textColor = getColor(TEXT);
+    } else if ([@[@"÷", @"×", @"−", @"+", @"="] containsObject:str]) {
+        ((UILabel*)((UIView*)self).subviews[0]).textColor = getColor(BASE);
+    } else if ([@[@"0", @"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"."] containsObject:str]) {
+        ((UIView*)self).backgroundColor = getColor(SURFACE0);
+    }
+}
+%end
+
+%end
+
+
 static void initUIKitHook() {
     UIKitColorTable = [@{
         @"_windowBackgroundColor": @BASE,
@@ -483,4 +503,5 @@ static void initUIKitHook() {
     }
 
     %init(uikithooks);
+    %init(uikithooks_calculator);
 }
