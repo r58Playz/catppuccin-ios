@@ -4,6 +4,7 @@
 #import "vendor/youtube/YTColorPalette.h"
 #import "vendor/youtube/_ASDisplayView.h"
 #import "vendor/youtube/ASTextNode.h"
+#import "vendor/youtube/ELMNodeController.h"
 
 %group integration_youtube
 %hook YTCommonColorPalette
@@ -93,8 +94,8 @@
 - (UIColor *)errorIndicator { return getColor(RED); }
 
 - (UIColor *)baseBackground { return getColor(BASE); }
-- (UIColor *)raisedBackground { return getColor(BASE); }
-- (UIColor *)menuBackground { return getColor(BASE); }
+- (UIColor *)raisedBackground { return getColor(SURFACE0); }
+- (UIColor *)menuBackground { return getColor(SURFACE0); }
 - (UIColor *)invertedBackground { return getColor(TEXT); }
 - (UIColor *)additiveBackground { return getColor(MANTLE); }
 
@@ -107,66 +108,6 @@
 + (UIColor *)black1 { return getColor(ADAPTIVE_DARK); }
 + (UIColor *)black2 { return getColor(ADAPTIVE_DARK); }
 + (UIColor *)black3 { return getColor(ADAPTIVE_DARK); }
-%end
-
-%hook YTColorPalette
-- (UIColor *)background1 { return getColor(BASE); }
-- (UIColor *)background2 { return getColor(MANTLE); }
-- (UIColor *)background3 { return getColor(CRUST); }
-- (UIColor *)brandBackgroundSolid { return getColor(MANTLE); }
-- (UIColor *)brandBackgroundPrimary { return getColor(MANTLE); }
-- (UIColor *)brandBackgroundSecondary { return getColor(CRUST); }
-- (UIColor *)generalBackgroundA { return getColor(BASE); }
-- (UIColor *)generalBackgroundB { return getColor(MANTLE); }
-- (UIColor *)generalBackgroundC { return getColor(CRUST); }
-- (UIColor *)errorBackground { return %orig; }
-- (UIColor *)textPrimary { return getColor(TEXT); }
-- (UIColor *)textSecondary { return getColor(SUBTEXT0); }
-- (UIColor *)textDisabled { return getColor(OVERLAY0); }
-- (UIColor *)textPrimaryInverse { return getColor(BASE); }
-- (UIColor *)callToAction { return getColor(ACCENT); }
-- (UIColor *)iconActive { return getColor(ACCENT); }
-- (UIColor *)iconActiveOther { return getColor(TEXT); }
-- (UIColor *)iconInactive { return getColor(SUBTEXT0); }
-- (UIColor *)iconDisabled { return getColor(OVERLAY0); }
-- (UIColor *)badgeChipBackground { return getColor(SURFACE0); }
-- (UIColor *)buttonChipBackgroundHover { return %orig; }
-- (UIColor *)touchResponse { return getColor(MEDTRANS_TEXT); }
-- (UIColor *)callToActionInverse { return getColor(ADAPTIVE_DARK); }
-- (UIColor *)brandIconActive { return getColor(TEXT); }
-- (UIColor *)brandIconInactive { return getColor(OVERLAY0); }
-- (UIColor *)brandButtonBackground { return %orig; }
-- (UIColor *)brandLinkText { return getColor(ACCENT); }
-- (UIColor *)tenPercentLayer { return getColor(HIGHTRANS_BASE); }
-- (UIColor *)snackbarBackground { return getColor(BASE); }
-- (UIColor *)themedBlue { return getColor(BLUE); }
-- (UIColor *)themedGreen { return getColor(GREEN); }
-- (UIColor *)staticBrandRed { return getColor(RED); }
-- (UIColor *)staticBrandWhite { return getColor(ADAPTIVE_LIGHT); }
-- (UIColor *)staticBrandBlack { return getColor(ADAPTIVE_DARK); }
-- (UIColor *)staticClearColor { return getColor(TRANSPARENT); }
-- (UIColor *)staticAdYellow { return getColor(YELLOW); }
-- (UIColor *)staticGrey { return getColor(OVERLAY0); }
-- (UIColor *)overlayBackgroundSolid { return getColor(MEDTRANS_BASE); }
-- (UIColor *)overlayBackgroundHeavy { return getColor(LOWTRANS_BASE); }
-- (UIColor *)overlayBackgroundMedium { return getColor(MEDTRANS_BASE); }
-- (UIColor *)overlayBackgroundMediumLight { return getColor(MEDTRANS_BASE); }
-- (UIColor *)overlayBackgroundLight { return getColor(MEDTRANS_BASE); }
-- (UIColor *)overlayBackgroundBrand { return getColor(MEDTRANS_BASE); }
-- (UIColor *)overlayBackgroundClear { return getColor(TRANSPARENT); }
-- (UIColor *)overlayTextPrimary { return getColor(TEXT); }
-- (UIColor *)overlayTextSecondary { return getColor(SUBTEXT0); }
-- (UIColor *)overlayTextTertiary { return getColor(OVERLAY0); }
-- (UIColor *)overlayIconActiveCallToAction { return getColor(ACCENT); }
-- (UIColor *)overlayIconActiveOther { return getColor(TEXT); }
-- (UIColor *)overlayIconInactive { return getColor(SUBTEXT0); }
-- (UIColor *)overlayIconDisabled { return getColor(OVERLAY0); }
-- (UIColor *)overlayFilledButtonActive { return getColor(ACCENT); }
-- (UIColor *)overlayButtonSecondary { return getColor(TEXT); }
-- (UIColor *)overlayButtonPrimary { return getColor(TEXT); }
-- (UIColor *)verifiedBadgeBackground { return getColor(SURFACE0); }
-- (UIColor *)themedOverlayBackground { return %orig; }
-- (UIColor *)adIndicator { return getColor(YELLOW); }
 %end
 
 %hook YTMySubsFilterHeaderView
@@ -214,6 +155,8 @@
     if ([self.accessibilityIdentifier isEqualToString:@"dot-decoration-id"]) {
         self.backgroundColor = getColor(ACCENT);
         self.yogaParent.backgroundColor = getColor(SURFACE1);
+    } if([self.accessibilityIdentifier hasPrefix:@"id.elements.components.overflow_menu_item_"]) {
+        self.backgroundColor = getColor(SURFACE0);
     }
     %orig;
 }
@@ -221,8 +164,10 @@
 
 %hook ASTextNode
 -(void)didLoad {
+    NSString *cDesc = [[[self controller] owningComponent] description];
     NSString *parentId = self.yogaParent.accessibilityIdentifier;
     NSString *parentParentId = self.yogaParent.yogaParent.accessibilityIdentifier;
+    NSString *parentParentCDesc = [[[self.yogaParent.yogaParent controller] owningComponent] description];
 
     if ([parentId isEqualToString:@"subs_channel_list.all_button"]) {
         NSMutableAttributedString *str = [self.attributedText mutableCopy];
@@ -230,11 +175,25 @@
         self.attributedText = str;
     } else if (
         [parentId isEqualToString:@"channel-bar-channel-id"] ||
-        [parentParentId isEqualToString:@"eml.metadata"]
+        [parentId isEqualToString:@"channel-list-itm-element-id"] ||
+        [parentParentId isEqualToString:@"eml.metadata"] ||
+        [parentParentCDesc containsString:@"video_metadata_inner.eml"] ||
+        [self.accessibilityIdentifier isEqualToString:@"id.ui.channel_bar_header_title"]
     ) {
         NSMutableAttributedString *str = [self.attributedText mutableCopy];
         [str addAttribute:NSForegroundColorAttributeName value:getColor(TEXT) range:NSMakeRange(0,[str length])];
         self.attributedText = str;
+    } else if ([self.accessibilityIdentifier isEqualToString:@"id.ui.channel_bar_header_subtitle"]) {
+        NSMutableAttributedString *str = [self.attributedText mutableCopy];
+        [str addAttribute:NSForegroundColorAttributeName value:getColor(SUBTEXT0) range:NSMakeRange(0,[str length])];
+        self.attributedText = str;
+    } else if ([cDesc containsString:@"video_subtitle.eml"]) {
+        NSMutableAttributedString *str = [self.attributedText mutableCopy];
+        [str addAttribute:NSForegroundColorAttributeName value:getColor(SUBTEXT0) range:NSMakeRange(0,[str length])];
+        self.attributedText = str;
+        str = [MSHookIvar<NSAttributedString*>(self, "_truncationAttributedText") mutableCopy];
+        [str addAttribute:NSForegroundColorAttributeName value:getColor(TEXT) range:NSMakeRange(0,[str length])];
+        MSHookIvar<NSAttributedString*>(self, "_truncationAttributedText") = str;
     }
 }
 %end
@@ -254,6 +213,22 @@
     MSHookIvar<UIColor*>(self, "_unbufferedProgressBarColor") = getColor(SURFACE1);
     MSHookIvar<UIColor*>(self, "_linearLiveStreamSeekableProgressColor") = getColor(ACCENT);
     MSHookIvar<UIView*>(self, "_scrubberCircle").backgroundColor = getColor(ACCENT);
+}
+%end
+
+@interface YTModularPlayerBarView {}
+-(void)resetPlayerBarModeColors;
+@end
+
+%hook YTModularPlayerBarView 
+-(void)resetPlayerBarModeColors {
+    MSHookIvar<UIColor*>(self, "_progressBarColor") = getColor(ACCENT);
+    MSHookIvar<UIColor*>(self, "_userIsScrubbingProgressBarColor") = getColor(ACCENT);
+    MSHookIvar<UIColor*>(self, "_bufferedProgressBarColor") = getColor(OVERLAY0);
+    MSHookIvar<UIColor*>(self, "_unbufferedProgressBarColor") = getColor(SURFACE1);
+    MSHookIvar<UIColor*>(self, "_linearLiveStreamSeekableProgressColor") = getColor(ACCENT);
+    MSHookIvar<UIView*>(self, "_scrubberCircle").backgroundColor = getColor(ACCENT);
+    %orig;
 }
 %end
 

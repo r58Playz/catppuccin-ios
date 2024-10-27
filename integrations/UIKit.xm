@@ -43,6 +43,15 @@ static UIColor *getColorFromUIKitTableD(NSString *name, UIColor *orig) {
 %end
 
 %hook UIColor
++ (UIColor *)colorNamed:(NSString *)name inBundle:(NSBundle *)bundle compatibleWithTraitCollection:(UITraitCollection *)traitCollection {
+    if([name isEqualToString:@"AccentColor"]) {
+        return getColor(ACCENT);
+    }
+    UIColor *orig = %orig;
+    NSLog(@"ctpios uikit: asset color %@ not found, returning %@", name, [[CIColor colorWithCGColor:[orig CGColor]] stringRepresentation]);
+    return orig;
+}
+
 +(id)separatorColor { return getColorFromUIKitTableD(@"separatorColor", %orig); }
 +(id)insertionPointColor { return getColorFromUIKitTableD(@"insertionPointColor", %orig); }
 +(id)selectionHighlightColor { return getColorFromUIKitTableD(@"selectionHighlightColor", %orig); }

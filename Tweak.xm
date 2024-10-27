@@ -26,6 +26,9 @@ static NSString *PROCESS_NAME;
 #import "headers/UISUserInterfaceStyleMode.h"
 
 //__CTPIOS_PREPROCESSOR_SED_HERE
+extern "C" {
+	void initSwift();
+}
 
 static void setDarkMode(unsigned long long modeValue) {
     if ([PROCESS_NAME isEqualToString:@"Preferences"]) {
@@ -37,6 +40,8 @@ static void setDarkMode(unsigned long long modeValue) {
 }
 
 static void loadPreferences() {
+    enabledTweaks = [NSMutableArray array];
+    enabledIntegrations = [NSMutableArray array];
     // https://iphonedev.wiki/PreferenceBundles
     BOOL isSystem = [NSHomeDirectory() isEqualToString:@"/var/mobile"];
     NSDictionary* prefs = nil;
@@ -86,8 +91,6 @@ static void loadPreferences() {
 
 %ctor {
     PROCESS_NAME = [[NSProcessInfo processInfo] processName];
-    enabledTweaks = [NSMutableArray array];
-    enabledIntegrations = [NSMutableArray array];
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPreferences, CFSTR("com.catppuccin.ios.prefs/reload"), NULL, CFNotificationSuspensionBehaviorCoalesce);
     loadPreferences();
@@ -95,6 +98,8 @@ static void loadPreferences() {
     NSLog(@"ctpios: process name %@", PROCESS_NAME);
     NSLog(@"ctpios: initializing uikit hooks");
     initUIKitHook();
+	NSLog(@"ctpios: initializing swift hooks");
+	initSwift();
 
     if ([enabledIntegrations containsObject:@"youtube"] && [PROCESS_NAME isEqualToString:@"YouTube"]) {
         NSLog(@"ctpios: initializing youtube hooks");

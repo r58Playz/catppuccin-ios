@@ -45,13 +45,15 @@ NSData *GitHubMakeColorb(int c1, int c2, float blendAmt) {
 // scuffed but i don't know how to properly hook swiftui
 -(void)tintColorDidChange {
     UIColor* col = getColor(ADAPTIVE_DARK);
+    NSLog(@"%@", self.backgroundColor);
     if ((
         [NSStringFromClass([self.superview.superview.superview class]) isEqualToString:@"GitHub.HomeWorkCell"] ||
         [NSStringFromClass([self.superview class]) isEqualToString:@"GitHubUI.AvatarPairView"] ||
         [NSStringFromClass([self.superview.superview class]) isEqualToString:@"GitHub.IssueMergedCell"] ||
         [NSStringFromClass([self.superview.superview class]) isEqualToString:@"GitHub.IssueStatusEventCell"] ||
         [NSStringFromClass([self.superview.superview class]) isEqualToString:@"GitHub.IssueReviewHeaderCell"] ||
-        [NSStringFromClass([self.superview.superview.superview.superview.superview class]) isEqualToString:@"GitHub.ProfileDetailTableViewCell"]
+        [NSStringFromClass([self.superview.superview.superview.superview.superview class]) isEqualToString:@"GitHub.ProfileDetailTableViewCell"] ||
+        [NSStringFromClass([self.superview class]) isEqualToString:@"UISwipeActionStandardButton"]
         ) && ![self.tintColor isEqual:col]) {
         self.tintColor = col;
     }
